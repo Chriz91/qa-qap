@@ -24,8 +24,13 @@ print "Distances", distances
 print "Flows", flows
 print "Number of nodes", num_nodes
 
-# ToDo: Facility to location mapping. Used for decoding quantum annealing response
+# Facility to location mapping. Used for decoding quantum annealing response
+facility_to_location = []
+for i in range(num_nodes):
+    for j in range(1, num_nodes+1):
+        facility_to_location.append(string.ascii_uppercase[i] + str(j))
 
+print "Facility to location", facility_to_location
 
 # ToDo: Determine length of QUBO matrix and prefactor (QUBO is the matrix in form of a python dictionary)
 
@@ -36,9 +41,7 @@ print "Number of nodes", num_nodes
 # ToDo: Optimization Function (add distances and flows)
 # Add distances
 
-
 # Add flows
-
 
 # ToDo: Constraint that every location has exactly one facility assigned 
 
@@ -52,12 +55,18 @@ print "Number of nodes", num_nodes
 #         print(" %s, %s : %s " % (v, j, QUBO[(v, j)]))
 
 # Call QBSolv
-answer = QBSolv().sample_qubo(QUBO, num_repeats=num_repeats, seed=seed, algorithm=algorithm, verbosity=verbosity,
-                          timeout=timeout, solver_limit=solver_limit, solver=solver, target=target, find_max=find_max)
+# answer = QBSolv().sample_qubo(QUBO, num_repeats=num_repeats, seed=seed, algorithm=algorithm, verbosity=verbosity,
+#                           timeout=timeout, solver_limit=solver_limit, solver=solver, target=target, find_max=find_max)
 
-# Decode QBSolv answer
-samples = list(answer.samples())
-print "samples", samples
-print "energies", list(answer.data_vectors['energy'])
+# # Decode QBSolv answer
+# samples = list(answer.samples())
+# print "samples", samples
+# print "energies", list(answer.data_vectors['energy'])
 
-# ToDo: Decode answer and print it to the console
+# # Decode answer and print it to the console
+# for i in range(len(samples)):
+#     print "Solution Nr", i
+#     print samples[i]
+#     for j in range(len(samples[0])):
+#         if samples[i][j] == 1:
+#             print facility_to_location[j]
