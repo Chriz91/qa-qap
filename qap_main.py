@@ -32,22 +32,56 @@ for i in range(num_nodes):
 
 print "Facility to location", facility_to_location
 
-# ToDo: Determine length of QUBO matrix and prefactor (QUBO is the matrix in form of a python dictionary)
+# Determine length of QUBO matrix and prefactor (QUBO is the matrix in form of a python dictionarylength_of_QUBO
+length_of_QUBO = num_nodes**2
+prefactor = distances.max()* flows.max()*100
+QUBO = {}
 
+# Fill upper triangular QUBO Matrix
+for v in range(0, length_of_QUBO):
+    for j in range(v, length_of_QUBO):
+        QUBO[(v,j)] = 0.0
 
-# ToDo: Fill upper triangular QUBO Matrix
-
-
-# ToDo: Optimization Function (add distances and flows)
+# Optimization Function (add distances and flows)
 # Add distances
+dist_x = 0
+dist_y = 0
+for v in range(0, length_of_QUBO):
+    for j in range(v, length_of_QUBO):
+        if j % num_nodes == 0 and v != j:
+            dist_y +=1
+        if v % num_nodes == 0 and j ==v and v != 0:
+            dist_x +=1
+        QUBO[(v,j)] = QUBO[(v,j)] + distances[dist_x][dist_y]
+
+        if j == length_of_QUBO-1:
+            dist_y = dist_x
+            if v % num_nodes == num_nodes-1:
+                dist_y += 1
 
 # Add flows
+for v in range(0, length_of_QUBO):
+    for j in range(v, length_of_QUBO):
+        QUBO[(v, j)] = QUBO[(v, j)] * flows[v % num_nodes][j % num_nodes]
 
-# ToDo: Constraint that every location has exactly one facility assigned 
+# Constraint that every location has exactly one facility assigned
+for v in range(0, length_of_QUBO):
+    for j in range(v, length_of_QUBO):
+        if v == j:
+            QUBO[(v, j)] = QUBO[(v, j)] + (-1.0) * prefactor
+        else:
+            if j % num_nodes== v % num_nodes:
+                QUBO[(v, j)] = QUBO[(v, j)] + (2.0) * prefactor
 
-
-# ToDo: Constraint that every machine has exactly one location assigned 
-
+# Constraint that every machine has exactly one location assigned
+for v in range(0, length_of_QUBO):
+    for j in range(v, length_of_QUBO):
+        if j % num_nodes == 0 and v != j:
+            break
+        if v == j:
+            QUBO[(v, j)] = QUBO[(v, j)] + (-1.0) * prefactor
+        else:
+            QUBO[(v, j)] = QUBO[(v, j)] + (2.0) * prefactor
 
 # Prints QUBO Matrix to console (for debugging purpose)
 # for v in range(0, length_of_QUBO):
@@ -55,18 +89,18 @@ print "Facility to location", facility_to_location
 #         print(" %s, %s : %s " % (v, j, QUBO[(v, j)]))
 
 # Call QBSolv
-# answer = QBSolv().sample_qubo(QUBO, num_repeats=num_repeats, seed=seed, algorithm=algorithm, verbosity=verbosity,
-#                           timeout=timeout, solver_limit=solver_limit, solver=solver, target=target, find_max=find_max)
+answer = QBSolv().sample_qubo(QUBO, num_repeats=num_repeats, seed=seed, algorithm=algorithm, verbosity=verbosity,
+                          timeout=timeout, solver_limit=solver_limit, solver=solver, target=target, find_max=find_max)
 
 # # Decode QBSolv answer
-# samples = list(answer.samples())
-# print "samples", samples
-# print "energies", list(answer.data_vectors['energy'])
+samples = list(answer.samples())
+print "samples", samples
+print "energies", list(answer.data_vectors['energy'])
 
 # # Decode answer and print it to the console
-# for i in range(len(samples)):
-#     print "Solution Nr", i
-#     print samples[i]
-#     for j in range(len(samples[0])):
-#         if samples[i][j] == 1:
-#             print facility_to_location[j]
+for i in range(len(samples)):
+    print "Solution Nr", i
+    print samples[i]
+    for j in range(len(samples[0])):
+        if samples[i][j] == 1:
+            print facility_to_location[j]
